@@ -34,15 +34,14 @@ public class Main {
         // KyberDecrypted carrega a chave secreta(será a mesma que Bob gerou) e a variante
         final var kyberDecrypted = aliceGeneratesKyberDecrypted(aliceKeyAgreement, kyberEncrypted.getCipherText());
 
-        final var verification = kyberDecrypted.getSecretKey().equals(kyberEncrypted.getSecretKey());
-        System.out.printf("Alice recebeu uma chave secreta igual a de Bob? [%s]%n", verification);
+
     }
 
     private static KeyPair aliceGeneratesKeyPair() throws NoSuchAlgorithmException {
         // "Kyber512", "Kyber768", "Kyber1024" são as opções para geração de chaves
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("Kyber1024");
         final var keyPair = keyGen.generateKeyPair();
-        System.out.println("Alice enviou sua chave públicapara Bob!");
+        System.out.println("Alice enviou sua chave pública para Bob!");
         return keyPair;
     }
 
@@ -71,7 +70,6 @@ public class Main {
 
     private static KyberDecrypted aliceGeneratesKyberDecrypted(final KeyAgreement aliceKeyAgreement, final KyberCipherText cipherText) throws InvalidKeyException {
         return (KyberDecrypted) aliceKeyAgreement.doPhase(cipherText, true);
-
     }
 
 }
