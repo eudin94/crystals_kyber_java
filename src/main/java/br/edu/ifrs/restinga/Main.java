@@ -7,6 +7,7 @@ import com.swiftcryptollc.crypto.provider.KyberJCE;
 
 import javax.crypto.KeyAgreement;
 import java.security.*;
+import java.util.Base64;
 
 public class Main {
 
@@ -15,34 +16,33 @@ public class Main {
         Security.setProperty("crypto.policy", "unlimited");
         Security.addProvider(new KyberJCE());
 
-        // Alice gera um par de chaves e manda sua chave pública para Bob
+        System.out.println("Alice gera um par de chaves e manda sua chave pública para Bob");
         final var aliceKeyPair = aliceGeneratesKeyPair();
 
-        // Bob gera um par de chaves
+        System.out.println("Bob gera um par de chaves");
         final var bobKeyPair = bobGeneratesKeyPair();
 
-        // Bob gera um acordo inicial de chaves a partir de sua chave privada
+        System.out.println("Bob gera um acordo inicial de chaves a partir de sua chave privada");
         final var bobKeyAgreement = bobGeneratesKeyAgreement(bobKeyPair.getPrivate());
 
-        // Bob gera um KyberEncrypted, carregando a chave secreta e o texto cifrado da chave pública de Alice, então envia para ela o texto cifrado
+        System.out.println("Bob gera um KyberEncrypted, carregando a chave secreta e o texto cifrado a partir da chave pública de Alice, então envia para ela o texto cifrado");
         final var kyberEncrypted = bobGeneratesKyberEncrypted(bobKeyAgreement, aliceKeyPair.getPublic());
 
-        // Alice cria seu próprio acordo de chaves e o inicializa com sua chave privada
+        System.out.println("Alice cria seu próprio acordo de chaves e o inicializa com sua chave privada");
         final var aliceKeyAgreement = aliceGeneratesKeyAgreement(aliceKeyPair.getPrivate());
 
-        // Alice gera a mesma chave secreta a partir do texto cifrado assim gerando um KyberDecrypted
-        // KyberDecrypted carrega a chave secreta(será a mesma que Bob gerou) e a variante
+        System.out.println("Alice gera a mesma chave secreta a partir do texto cifrado assim gerando um KyberDecrypted");
+        System.out.println("KyberDecrypted carrega a chave secreta(será a mesma que Bob gerou) e a variante");
         final var kyberDecrypted = aliceGeneratesKyberDecrypted(aliceKeyAgreement, kyberEncrypted.getCipherText());
 
-
+        System.out.println("ENCRYPTED SECRET KEY = " + Base64.getEncoder().encodeToString(kyberEncrypted.getSecretKey().getEncoded()));
+        System.out.println("DECRYPTED SECRET KEY = " + Base64.getEncoder().encodeToString(kyberDecrypted.getSecretKey().getEncoded()));
     }
 
     private static KeyPair aliceGeneratesKeyPair() throws NoSuchAlgorithmException {
         // "Kyber512", "Kyber768", "Kyber1024" são as opções para geração de chaves
         KeyPairGenerator keyGen = KeyPairGenerator.getInstance("Kyber1024");
-        final var keyPair = keyGen.generateKeyPair();
-        System.out.println("Alice enviou sua chave pública para Bob!");
-        return keyPair;
+        return keyGen.generateKeyPair();
     }
 
     private static KeyPair bobGeneratesKeyPair() throws NoSuchAlgorithmException {
@@ -57,9 +57,7 @@ public class Main {
     }
 
     private static KyberEncrypted bobGeneratesKyberEncrypted(final KeyAgreement bobKeyAgreement, final PublicKey alicePublicKey) throws InvalidKeyException {
-        KyberEncrypted kyberEncrypted = (KyberEncrypted) bobKeyAgreement.doPhase(alicePublicKey, true);
-        System.out.println("Bob gerou o texto cifrado e enviou para a Alice");
-        return kyberEncrypted;
+        return (KyberEncrypted) bobKeyAgreement.doPhase(alicePublicKey, true);
     }
 
     private static KeyAgreement aliceGeneratesKeyAgreement(final PrivateKey alicePrivateKey) throws NoSuchAlgorithmException, InvalidKeyException {
