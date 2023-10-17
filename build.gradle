@@ -1,0 +1,19 @@
+plugins {
+    id 'java'
+}
+
+group = 'org.example'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    maven { url 'https://jitpack.io' }
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'com.github.fisherstevenk:kyberJCE:v3.0.0'
+}
+
+test {
+    useJUnitPlatform()
+}
