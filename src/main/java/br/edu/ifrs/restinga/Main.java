@@ -1,4 +1,4 @@
-package org.example;
+package br.edu.ifrs.restinga;
 
 import com.swiftcryptollc.crypto.provider.KyberCipherText;
 import com.swiftcryptollc.crypto.provider.KyberDecrypted;
