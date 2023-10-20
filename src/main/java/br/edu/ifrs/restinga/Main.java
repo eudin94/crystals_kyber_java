@@ -5,6 +5,7 @@ import java.security.AlgorithmParameters;
 import com.swiftcryptollc.crypto.interfaces.KyberPublicKey;
 import com.swiftcryptollc.crypto.provider.*;
 import com.swiftcryptollc.crypto.spec.KyberGenParameterSpec;
+import com.swiftcryptollc.crypto.util.*;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -84,18 +85,16 @@ public class Main {
         byte[] msgEncriptado = encrypt(msgEmBytes, bobKeyPair.getPublic().getEncoded(), msgEmBytes, KyberKeySize.KEY_1024.getParamsK());
 
 
+        System.out.println("\n*********\nMensagem limpa: " + new String(msgEmBytes,  StandardCharsets.UTF_8));
 
-        System.out.println("Mensagem limpa: " + new String(msgEmBytes,  StandardCharsets.UTF_8));
 
-        System.out.println( "Mensagem encriptada: " + Base64.getEncoder().encodeToString(msgEncriptado));
+        System.out.println( "\n*********\nMMensagem encriptada: " + Base64.getEncoder().encodeToString(msgEncriptado));
+
 
         byte[] msgDecriptado = decrypt(msgEncriptado, aliceKeyPair.getPrivate().getEncoded(), KyberKeySize.KEY_1024.getParamsK());
 
-        System.out.println("Mensagem decriptada: " + Base64.getEncoder().encodeToString(msgDecriptado));
-        System.out.println("VVVVVVVVVVVVVVVVVVVVVVVVV");
 
-
-
+        System.out.println("\n*********\nMMensagem decriptada: " + Base64.getEncoder().encodeToString(msgDecriptado));
 
 
 
