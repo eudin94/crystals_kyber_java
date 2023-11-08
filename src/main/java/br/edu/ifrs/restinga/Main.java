@@ -9,8 +9,11 @@ import com.swiftcryptollc.crypto.util.*;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.security.spec.KeySpec;
 import java.security.spec.X509EncodedKeySpec;
 import java.util.Arrays;
 import java.util.Base64;
@@ -24,6 +27,8 @@ import static com.swiftcryptollc.crypto.provider.kyber.Indcpa.*;
 
 
 public class Main {
+    private static final int KEY_LENGTH = 256;
+    private static final int ITERATION_COUNT = 65536;
     public static void main(String[] args) throws Exception {
 
         Security.setProperty("crypto.policy", "unlimited");
@@ -82,21 +87,46 @@ public class Main {
 
 
         // -------------------------------------------------------
-        byte[] msgEncriptado = encrypt(msgEmBytes, bobKeyPair.getPublic().getEncoded(), msgEmBytes, KyberKeySize.KEY_1024.getParamsK());
+        // utilizando a chave secreta do kyber para criptografar um dado com AES
+        String salt = "D;%yL9TS:5PalS/d";
+
+        SecureRandom secureRandom = new SecureRandom();
+        byte[] iv = new byte[16];
+        secureRandom.nextBytes(iv);
+        IvParameterSpec ivspec = new IvParameterSpec(iv);
+
+        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        KeySpec spec = new PBEKeySpec(kyberEncrypted.getSecretKey().getEncoded().toString().toCharArray(), salt.getBytes(), ITERATION_COUNT, KEY_LENGTH);
+        SecretKey tmp = factory.generateSecret(spec);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(tmp.getEncoded(), "AES");
+
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivspec);
+
+        byte[] cipherText = cipher.doFinal(mensagem.getBytes("UTF-8"));
+        byte[] encryptedData = new byte[iv.length + cipherText.length];
+        System.arraycopy(iv, 0, encryptedData, 0, iv.length);
+        System.arraycopy(cipherText, 0, encryptedData, iv.length, cipherText.length);
 
 
-        System.out.println("\n*********\nMensagem limpa: " + new String(msgEmBytes,  StandardCharsets.UTF_8));
+        System.out.println("Msg encriptada= " + Base64.getEncoder().encodeToString(encryptedData));
 
 
-        System.out.println( "\n*********\nMMensagem encriptada: " + Base64.getEncoder().encodeToString(msgEncriptado));
+        // -----------------------------------------------------------
+        // decriptografando a mensagem
 
 
-        byte[] msgDecriptado = decrypt(msgEncriptado, aliceKeyPair.getPrivate().getEncoded(), KyberKeySize.KEY_1024.getParamsK());
+        Cipher cifra = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        cifra.init(Cipher.DECRYPT_MODE, secretKeySpec, ivspec);
 
+        byte[] cifraText = new byte[encryptedData.length - 16];
+        System.arraycopy(encryptedData, 16, cifraText, 0, cifraText.length);
 
-        System.out.println("\n*********\nMMensagem decriptada: " + Base64.getEncoder().encodeToString(msgDecriptado));
+        byte[] decryptedText = cifra.doFinal(cifraText);
 
+        String msgLimpa =  new String(decryptedText, "UTF-8");
 
+        System.out.println("\nMsg Limpa: \n" + msgLimpa);
 
 
     }
