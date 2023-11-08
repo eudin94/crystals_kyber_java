@@ -95,38 +95,40 @@ public class Main {
         secureRandom.nextBytes(iv);
         IvParameterSpec ivspec = new IvParameterSpec(iv);
 
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-        KeySpec spec = new PBEKeySpec(kyberEncrypted.getSecretKey().getEncoded().toString().toCharArray(), salt.getBytes(), ITERATION_COUNT, KEY_LENGTH);
-        SecretKey tmp = factory.generateSecret(spec);
-        SecretKeySpec secretKeySpec = new SecretKeySpec(tmp.getEncoded(), "AES");
+        SecretKeyFactory factoryBob = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        KeySpec specBob = new PBEKeySpec(kyberEncrypted.getSecretKey().getEncoded().toString().toCharArray(), salt.getBytes(), ITERATION_COUNT, KEY_LENGTH);
+        SecretKey tmpBob = factoryBob.generateSecret(specBob);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(tmpBob.getEncoded(), "AES");
 
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivspec);
 
         byte[] cipherText = cipher.doFinal(mensagem.getBytes("UTF-8"));
-        byte[] encryptedData = new byte[iv.length + cipherText.length];
-        System.arraycopy(iv, 0, encryptedData, 0, iv.length);
-        System.arraycopy(cipherText, 0, encryptedData, iv.length, cipherText.length);
+        byte[] msgEncriptada = new byte[iv.length + cipherText.length];
+        System.arraycopy(iv, 0, msgEncriptada, 0, iv.length);
+        System.arraycopy(cipherText, 0, msgEncriptada, iv.length, cipherText.length);
 
 
-        System.out.println("Msg encriptada= " + Base64.getEncoder().encodeToString(encryptedData));
+        System.out.println("Msg encriptada= " + Base64.getEncoder().encodeToString(msgEncriptada));
 
 
         // -----------------------------------------------------------
         // decriptografando a mensagem
 
+        SecretKeyFactory factoryAlice = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        KeySpec specAlice = new PBEKeySpec(kyberEncrypted.getSecretKey().getEncoded().toString().toCharArray(), salt.getBytes(), ITERATION_COUNT, KEY_LENGTH);
+        SecretKey tmpAlice = factoryAlice.generateSecret(specAlice);
+        SecretKeySpec secretKeySpecAlice = new SecretKeySpec(tmpAlice.getEncoded(), "AES");
 
         Cipher cifra = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cifra.init(Cipher.DECRYPT_MODE, secretKeySpec, ivspec);
 
-        byte[] cifraText = new byte[encryptedData.length - 16];
-        System.arraycopy(encryptedData, 16, cifraText, 0, cifraText.length);
+        byte[] cifraText = new byte[msgEncriptada.length - 16];
+        System.arraycopy(msgEncriptada, 16, cifraText, 0, cifraText.length);
 
-        byte[] decryptedText = cifra.doFinal(cifraText);
+        String msgDescriptada = new String(cifra.doFinal(cifraText), "UTF-8");
 
-        String msgLimpa =  new String(decryptedText, "UTF-8");
-
-        System.out.println("\nMsg Limpa: \n" + msgLimpa);
+        System.out.println("\nMsg Limpa: \n" + msgDescriptada);
 
 
     }
