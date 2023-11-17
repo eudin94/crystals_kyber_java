@@ -1,6 +1,5 @@
 package br.edu.ifrs.restinga;
 
-import com.swiftcryptollc.crypto.interfaces.KyberPublicKey;
 import com.swiftcryptollc.crypto.provider.KyberCipherText;
 import com.swiftcryptollc.crypto.provider.KyberDecrypted;
 import com.swiftcryptollc.crypto.provider.KyberEncrypted;
@@ -13,6 +12,7 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.security.spec.KeySpec;
 import java.util.Arrays;
@@ -83,7 +83,7 @@ public class Main {
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         cipher.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivspec);
 
-        byte[] cipherText = cipher.doFinal(mensagem.getBytes("UTF-8"));
+        byte[] cipherText = cipher.doFinal(mensagem.getBytes(StandardCharsets.UTF_8));
         byte[] msgEncriptada = new byte[iv.length + cipherText.length];
         System.arraycopy(iv, 0, msgEncriptada, 0, iv.length);
         System.arraycopy(cipherText, 0, msgEncriptada, iv.length, cipherText.length);
@@ -106,7 +106,7 @@ public class Main {
         byte[] cifraText = new byte[msgEncriptada.length - 16];
         System.arraycopy(msgEncriptada, 16, cifraText, 0, cifraText.length);
 
-        String msgDescriptada = new String(cifra.doFinal(cifraText), "UTF-8");
+        String msgDescriptada = new String(cifra.doFinal(cifraText), StandardCharsets.UTF_8);
 
         System.out.println("\nMsg Limpa: \n" + msgDescriptada);
 
