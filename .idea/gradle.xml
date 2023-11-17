@@ -5,7 +5,7 @@
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleJvm" value="openjdk-21" />
+        <option name="gradleHome" value="C:/Dev/gradle-8.0.1" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
